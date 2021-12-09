@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import RegexHelper
+import Algorithms
 
 func main() {
     let fileUrl = URL(fileURLWithPath: "./aoc-input")
@@ -12,28 +12,34 @@ func main() {
     
     let lines = inputString.components(separatedBy: "\n")
         .filter { !$0.isEmpty }
-    
-    // Sample algorithm
-    var scoreboard = [String: Int]()
-    lines.forEach { line in
-        let (name, score) = parseLine(line)
-        scoreboard[name] = score
-    }
-    scoreboard
-        .sorted { lhs, rhs in
-            lhs.value > rhs.value
-        }
-        .forEach { name, score in
-            print("\(name) \(score) pts")
-        }
-}
 
-func parseLine(_ line: String) -> (name: String, score: Int) {
-    let helper = RegexHelper(pattern: #"([\-\w]*)\s(\d+)"#)
-    let result = helper.parse(line)
-    let name = result[0]
-    let score = Int(result[1])!
-    return (name: name, score: score)
+    var points = [[Int]]()
+
+    var tempLine = [Int]()
+    for _ in 0 ..< lines[0].count + 2 { tempLine.append(10) }
+
+    points.append(tempLine)
+    lines.forEach { line in
+        var row = Array(line).map(String.init).map { Int($0)! }
+        row = [10] + row + [10]
+        points.append(row)
+    }
+    points.append(tempLine)
+
+    var lowPointHeights = [Int]()
+
+    for (i, j) in product(1 ..< points.count - 1, 1 ..< points[0].count - 1) {
+        if points[i][j] < points[i][j-1] &&
+            points[i][j] < points[i][j+1] &&
+            points[i][j] < points[i-1][j] &&
+            points[i][j] < points[i+1][j] {
+            lowPointHeights.append(points[i][j])
+            continue
+        }
+    }
+
+    let result = lowPointHeights.map { $0 + 1 }.reduce(0, +)
+    print(result)
 }
 
 main()
